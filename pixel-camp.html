@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moonlit Camp</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&family=Noto+Sans+SC:wght@500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--panel:#f5e6c4;--ink:#3a2314;--wood:#6a4029;--wood-hi:#9a6238;--fire:#ff9a3c;--bar:#d9c08f;--hud:rgba(20,18,50,.74);--cream:#fff1cf}
+#scene,.ic{shape-rendering:crispEdges;image-rendering:pixelated}
+#scene .o,#scene .o2{stroke-linejoin:miter;stroke-linecap:square}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:#2a2136;--ink:#f3e4c6;--bar:#3f3350}}
+:root[data-theme="dark"]{--panel:#2a2136;--ink:#f3e4c6;--bar:#3f3350}
+html,body{height:100%;margin:0;background:#0d1030;color:var(--cream)}
+body{font:600 16px/1.55 'Nunito','Noto Sans SC',system-ui,sans-serif;overflow:hidden}
+h1,h2,h3{font-family:'Baloo 2','ZCOOL KuaiLe','Noto Sans SC',sans-serif;font-weight:800;margin:0}
+:lang(zh) h1,:lang(zh) h2,:lang(zh) h3{font-family:'ZCOOL KuaiLe','Baloo 2',sans-serif;font-weight:400}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;gap:12px;padding:14px 16px;pointer-events:none;z-index:2}
+#hud>*{pointer-events:auto}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.05;text-shadow:0 3px 0 #150d1f}
+.role{margin:4px 0 0;text-shadow:0 2px 0 #150d1f}
+.res{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.res span{background:var(--hud);border:3px solid var(--wood);border-radius:999px;padding:2px 12px 2px 8px;font-weight:800;font-size:14px;white-space:nowrap}
+.res b{font-variant-numeric:tabular-nums}
+.lang{display:flex;border:3px solid var(--wood);border-radius:12px;overflow:hidden;height:fit-content;background:var(--hud)}
+.lang button{font:inherit;font-weight:800;padding:4px 12px;background:none;border:0;color:var(--cream);cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--fire);color:#2a1408}
+nav{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:6px;padding:8px;background:var(--wood);border:4px solid #3a2314;border-radius:18px;box-shadow:0 5px 0 #24140b;z-index:3}
+nav button{font:inherit;font-weight:800;display:flex;flex-direction:column;align-items:center;min-width:64px;padding:6px 8px;border:3px solid #3a2314;border-radius:12px;background:var(--wood-hi);color:var(--cream);cursor:pointer}
+nav button:hover,nav button[aria-current=true]{background:var(--fire);color:#2a1408}
+nav span{font-size:22px;line-height:1.1}
+nav small{font-size:12px}
+#panel{position:fixed;left:50%;bottom:104px;transform:translateX(-50%);width:min(580px,calc(100vw - 24px));max-height:calc(100svh - 200px);overflow:auto;background:var(--panel);color:var(--ink);border:6px solid var(--wood);border-radius:20px;box-shadow:0 0 0 3px #24140b,0 12px 30px rgba(0,0,0,.5);padding:14px 20px 20px;z-index:4;animation:up .25s ease-out}
+#panel[hidden]{display:none}
+@keyframes up{from{transform:translate(-50%,24px);opacity:0}}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+h2{font-size:28px}
+h3{font-size:19px;margin:14px 0 6px}
+#panel p{margin:0}
+#panel ul,#panel ol{margin:0;padding-left:20px}
+#x{font:inherit;font-weight:800;border:3px solid var(--wood);background:var(--wood-hi);color:var(--cream);border-radius:10px;width:36px;height:36px;cursor:pointer}
+.chips span{display:inline-block;margin:0 6px 6px 0;padding:1px 12px;border-radius:999px;background:var(--wood);color:var(--cream)}
+.q{margin-bottom:10px}.q i{font-style:normal;opacity:.75;margin-left:8px;font-size:14px}
+.bar{height:12px;background:var(--bar);border:2px solid var(--wood);border-radius:8px;overflow:hidden;margin-top:4px}
+.bar u{display:block;height:100%;background:linear-gradient(90deg,#e2792b,#ffcb5c)}
+.pubs li{margin-bottom:8px}.pubs small{display:block;opacity:.75}
+.ct{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}
+.pop{position:fixed;pointer-events:none;font:800 22px 'Baloo 2',sans-serif;color:#ffd66b;text-shadow:0 2px 0 #150d1f;animation:pop 1s forwards;z-index:5}
+@keyframes pop{to{transform:translateY(-60px);opacity:0}}
+.o{stroke:#150d1f;stroke-width:3.5;stroke-linejoin:miter;stroke-linecap:square}
+.hot{cursor:pointer;outline:none;transition:filter .2s}
+.hot:hover,.hot:focus-visible{filter:brightness(1.35) drop-shadow(0 0 0 #ffd66b)}
+.tw{animation:tw 1.2s steps(2) infinite alternate}
+@keyframes tw{from{opacity:.25}to{opacity:1}}
+.fl{transform-box:fill-box;transform-origin:50% 100%;animation:fl .5s steps(4) infinite alternate}
+.fl2{animation-duration:.4s;animation-delay:-.2s}
+@keyframes fl{from{transform:scale(1,1)}25%{transform:scale(.92,1.06)}50%{transform:scale(1.05,.95)}to{transform:scale(.96,1.1)}}
+.gl{transform-box:fill-box;transform-origin:center;animation:gl 1.6s steps(3) infinite alternate}
+@keyframes gl{from{opacity:.7;transform:scale(1)}to{opacity:1;transform:scale(1.12)}}
+.sp{animation:sp 2.6s steps(6) infinite}
+@keyframes sp{from{transform:translate(0,0);opacity:1}to{transform:translate(var(--x),-140px);opacity:0}}
+.ff{animation:ff 7s steps(10) infinite}
+@keyframes ff{0%{transform:translate(0,0);opacity:0}30%,70%{opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
+.mist{animation:mist 16s steps(8) infinite alternate}
+@keyframes mist{to{transform:translateX(60px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+#panel p+p{margin-top:8px}
+#panel a{color:inherit}
+.ic{width:26px;height:26px;display:block;overflow:visible}
+.res .ic{width:18px;height:18px;display:inline-block;vertical-align:-4px}
+nav{gap:4px;padding:6px;max-width:calc(100vw - 12px)}
+nav button{min-width:0;flex:1 1 0;padding:5px 6px;box-shadow:inset 0 2px 0 rgba(255,255,255,.28),0 3px 0 #24140b;transition:transform .1s}
+nav button:active{transform:translateY(2px)}
+nav small{font-size:11px;white-space:nowrap}
+nav button:hover .ic{animation:hop .4s}
+@keyframes hop{50%{transform:translateY(-4px) rotate(-8deg)}}
+.btn{display:inline-block;font:inherit;font-weight:800;text-decoration:none;color:#2a1408!important;background:var(--fire);border:3px solid #24140b;border-radius:12px;padding:6px 16px;box-shadow:0 3px 0 #24140b;cursor:pointer}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #24140b}
+#bub{position:fixed;left:0;top:0;z-index:2;max-width:min(260px,70vw);background:#fff;color:#20223a;border:3px solid #150d1f;border-radius:16px;padding:8px 12px;font-size:14px;line-height:1.4;font-weight:700;pointer-events:none;box-shadow:0 3px 0 #150d1f;opacity:0;transition:opacity .35s}
+#bub.on{opacity:1}
+#bub:after{content:"";position:absolute;bottom:-10px;left:var(--tx,50%);width:14px;height:14px;background:#fff;border:3px solid #150d1f;border-top:0;border-left:0;transform:translateX(-50%) rotate(45deg)}
+.lab{opacity:0;transition:opacity .2s;pointer-events:none}
+.lab text{font-family:'Baloo 2','ZCOOL KuaiLe','Noto Sans SC',sans-serif}
+.hot:hover .lab,.hot:focus-visible .lab{opacity:1}
+.spk{transform-box:fill-box;transform-origin:center;animation:spk 1.2s steps(2) infinite}
+@keyframes spk{50%{transform:scale(.6);opacity:.55}}
+.o2{stroke:#150d1f;stroke-width:2.2;stroke-linejoin:round}
+.walk{animation:walk 28s linear infinite alternate;pointer-events:none}
+.walk #gh{pointer-events:auto;cursor:pointer}
+@keyframes walk{to{transform:translateX(520px)}}
+.bob{animation:bob .4s steps(2) infinite alternate}
+@keyframes bob{to{transform:translateY(-4px)}}
+.leg{transform-box:fill-box;transform-origin:50% 0;animation:leg .5s steps(2) infinite alternate}
+.leg.b{animation-direction:alternate-reverse}
+@keyframes leg{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
+.stm{animation:stm 1.2s steps(3) infinite alternate}
+@keyframes stm{from{opacity:.25;transform:translateY(2px)}to{opacity:.9;transform:translateY(-4px)}}
+.steps li{margin-bottom:4px}
+#lib{position:fixed;inset:0;z-index:6;overflow:auto;padding:16px;background:radial-gradient(ellipse at 50% 0,#2b2a6b,#0d1030 70%)}
+#lib .top{display:flex;align-items:center;gap:14px;max-width:820px;margin:0 auto 16px}
+#lib main{max-width:820px;margin:0 auto}
+.bk{display:flex;gap:14px;width:100%;text-align:left;text-decoration:none;font:inherit;background:var(--panel);color:var(--ink);border:5px solid var(--wood);border-radius:16px;padding:14px;cursor:pointer;box-shadow:0 5px 0 #24140b;margin-bottom:12px}
+.bk:hover{transform:translateY(-2px)}
+.bk h3{margin:0 0 4px}.bk p{margin:0}
+.spine{flex:0 0 76px;height:108px;display:grid;place-items:center;text-align:center;padding:6px;border:3px solid #150d1f;border-radius:6px 12px 12px 6px;background:linear-gradient(90deg,#3a1d1d,#7a2a2a 45%,#5a1f1f);color:#ffd66b;font:800 17px/1.1 'Baloo 2',sans-serif}
+.rd{display:grid;grid-template-columns:210px 1fr;gap:14px;align-items:start}
+@media(max-width:640px){.rd{grid-template-columns:1fr}}
+.chb{display:block;width:100%;text-align:left;font:inherit;font-weight:800;margin-bottom:6px;padding:6px 12px;border:3px solid #24140b;border-radius:10px;background:var(--wood-hi);color:var(--cream);cursor:pointer}
+.chb[aria-current=true]{background:var(--fire);color:#2a1408}
+#reader article{background:var(--panel);color:var(--ink);border:5px solid var(--wood);border-radius:16px;padding:18px 22px;font:500 17px/1.85 Georgia,'Noto Sans SC',serif}
+.soon{opacity:.75}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-tent" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="15" y="2" width="2" height="6" fill="#150d1f" stroke="none"/><rect x="17" y="2" width="6" height="4" fill="#8b7cf6"/><rect x="14" y="8" width="4" height="2" fill="#e0754a"/><rect x="12" y="10" width="8" height="2" fill="#e0754a"/><rect x="10" y="12" width="12" height="2" fill="#e0754a"/><rect x="8" y="14" width="16" height="2" fill="#e0754a"/><rect x="6" y="16" width="20" height="2" fill="#e0754a"/><rect x="4" y="18" width="24" height="2" fill="#e0754a"/><rect x="2" y="20" width="28" height="8" fill="#e0754a"/><rect x="13" y="20" width="6" height="8" fill="#ffcb5c"/></g></symbol>
+<symbol id="i-book" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="4" y="19" width="24" height="7" fill="#6a5acd"/><rect x="6" y="12" width="21" height="7" fill="#2e8b6b"/><rect x="5" y="5" width="19" height="7" fill="#c2493a"/></g></symbol>
+<symbol id="i-lib" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="3" y="9" width="12" height="17" fill="#f2deb0"/><rect x="17" y="9" width="12" height="17" fill="#f2deb0"/><rect x="15" y="8" width="2" height="18" fill="#150d1f" stroke="none"/><rect x="6" y="13" width="6" height="2" fill="#8a6a3a" stroke="none"/><rect x="6" y="17" width="6" height="2" fill="#8a6a3a" stroke="none"/><rect x="20" y="13" width="6" height="2" fill="#8a6a3a" stroke="none"/><rect x="20" y="17" width="6" height="2" fill="#8a6a3a" stroke="none"/></g></symbol>
+<symbol id="i-scroll" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="4" y="6" width="4" height="20" fill="#e0c88f"/><rect x="24" y="6" width="4" height="20" fill="#e0c88f"/><rect x="8" y="6" width="16" height="20" fill="#f2deb0"/><rect x="11" y="11" width="10" height="2" fill="#8a6a3a" stroke="none"/><rect x="11" y="16" width="8" height="2" fill="#8a6a3a" stroke="none"/><rect x="11" y="21" width="10" height="2" fill="#8a6a3a" stroke="none"/></g></symbol>
+<symbol id="i-lantern" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="14" y="4" width="4" height="2" fill="#150d1f" stroke="none"/><rect x="12" y="6" width="8" height="2" fill="#150d1f" stroke="none"/><rect x="8" y="8" width="16" height="2" fill="#150d1f" stroke="none"/><rect x="9" y="9" width="14" height="17" fill="#ffcb5c"/><rect x="8" y="26" width="16" height="3" fill="#8a6a3a"/><rect x="13" y="9" width="6" height="17" fill="#ffe27a" stroke="none"/></g></symbol>
+<symbol id="i-cup" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="10" y="3" width="2" height="4" fill="#e8eefc" stroke="none"/><rect x="16" y="3" width="2" height="4" fill="#e8eefc" stroke="none"/><rect x="5" y="12" width="18" height="14" fill="#f4ecd8"/><rect x="5" y="20" width="18" height="6" fill="#e4d7b8" stroke="none"/><rect x="23" y="15" width="5" height="2" fill="none"/><rect x="26" y="15" width="2" height="8" fill="none"/><rect x="23" y="21" width="5" height="2" fill="none"/></g></symbol>
+<symbol id="i-bulb" viewBox="0 0 32 32" overflow="visible" shape-rendering="crispEdges"><g stroke="#150d1f" stroke-width="2"><rect x="13" y="4" width="6" height="2" fill="#ffd66b" stroke="none"/><rect x="10" y="6" width="12" height="2" fill="#ffd66b" stroke="none"/><rect x="9" y="8" width="14" height="10" fill="#ffd66b"/><rect x="11" y="18" width="10" height="5" fill="#ffd66b"/><rect x="12" y="26" width="8" height="2" fill="none"/><rect x="13" y="29" width="6" height="2" fill="none"/></g></symbol>
+</defs></svg>
+<svg id="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges">
+<defs>
+<path id="spk" d="M-2-9h4v6h-4zM-2 3h4v6h-4zM-9-2h6v4h-6zM3-2h6v4h-6zM-2-2h4v4h-4z" fill="#ffe27a" stroke="#150d1f" stroke-width="1.5"/>
+</defs>
+<rect width="1000" height="700" fill="#0d1030"/>
+<rect width="1000" height="230" fill="#080b28"/>
+<rect y="230" width="1000" height="150" fill="#141c50"/>
+<rect y="380" width="1000" height="115" fill="#232a72"/>
+<rect y="495" width="1000" height="30" fill="#2c3390"/>
+<g id="stars"></g>
+<g id="moon">
+<rect x="668" y="80" width="8" height="8" fill="#161a4a" opacity=".5"/><rect x="676" y="72" width="8" height="8" fill="#161a4a" opacity=".5"/><rect x="684" y="72" width="32" height="8" fill="#161a4a" opacity=".5"/><rect x="716" y="72" width="8" height="8" fill="#161a4a" opacity=".5"/><rect x="724" y="80" width="8" height="8" fill="#161a4a" opacity=".5"/><rect x="668" y="80" width="8" height="8" fill="#161a4a" opacity=".5"/>
+<rect x="676" y="88" width="8" height="48" fill="#fff6d6"/><rect x="668" y="96" width="8" height="32" fill="#fff6d6"/><rect x="684" y="80" width="32" height="64" fill="#fff6d6"/><rect x="716" y="88" width="8" height="48" fill="#fff6d6"/><rect x="724" y="96" width="8" height="32" fill="#fff6d6"/>
+<rect x="692" y="96" width="8" height="8" fill="#efe3b8"/><rect x="708" y="112" width="8" height="8" fill="#efe3b8"/><rect x="684" y="120" width="8" height="8" fill="#efe3b8"/>
+</g>
+<g id="far"></g>
+<g id="mid"></g>
+<g class="mist" fill="#cfe0ff" opacity=".08"><rect x="0" y="480" width="1000" height="20"/><rect x="0" y="520" width="1000" height="16"/></g>
+<rect y="575" width="1000" height="125" fill="#153a30"/>
+<rect x="0" y="565" width="60" height="10" fill="#153a30"/><rect x="60" y="570" width="80" height="5" fill="#153a30"/><rect x="380" y="558" width="120" height="17" fill="#153a30"/><rect x="700" y="562" width="140" height="13" fill="#153a30"/><rect x="900" y="568" width="100" height="7" fill="#153a30"/>
+<rect y="625" width="1000" height="75" fill="#0e2a24"/>
+<rect x="200" y="614" width="140" height="11" fill="#0e2a24"/><rect x="560" y="610" width="160" height="15" fill="#0e2a24"/><rect x="820" y="616" width="120" height="9" fill="#0e2a24"/>
+<g class="gl"><rect x="360" y="495" width="320" height="20" fill="#ffb347" opacity=".18"/><rect x="400" y="515" width="240" height="30" fill="#ffb347" opacity=".16"/><rect x="440" y="545" width="160" height="30" fill="#ff9a3c" opacity=".18"/></g>
+<g class="o" fill="#2a1a2b"><path d="M30 700L48 0H118L138 700Z"/><path d="M880 700L900 0H968L990 700Z"/></g>
+<g fill="#134238"><rect x="112" y="98" width="76" height="44"/><rect x="20" y="145" width="80" height="40"/><rect x="862" y="106" width="76" height="44"/><rect x="950" y="128" width="72" height="40"/></g>
+<g fill="#0b2a2a"><rect x="0" y="0" width="220" height="90"/><rect x="0" y="90" width="140" height="20"/><rect x="820" y="0" width="180" height="90"/><rect x="900" y="90" width="100" height="20"/></g>
+<rect class="o" x="395" y="606" width="80" height="24" fill="#7a4b2c"/>
+<rect class="o" x="575" y="608" width="80" height="24" fill="#7a4b2c"/>
+<g class="hot" data-p="about" tabindex="0" role="button">
+<rect x="322" y="446" width="16" height="8" fill="#150d1f"/>
+<rect x="308" y="454" width="44" height="8" fill="#c8623a"/>
+<rect x="294" y="462" width="72" height="8" fill="#c8623a"/>
+<rect x="280" y="470" width="100" height="8" fill="#c8623a"/>
+<rect x="266" y="478" width="128" height="8" fill="#c8623a"/>
+<rect x="252" y="486" width="156" height="8" fill="#c8623a"/>
+<rect x="238" y="494" width="184" height="8" fill="#c8623a"/>
+<rect x="235" y="502" width="190" height="103" fill="#c8623a"/>
+<rect x="303" y="528" width="54" height="77" fill="#ffb347"/>
+<rect x="235" y="502" width="190" height="8" fill="#a84d2c"/>
+<rect x="367" y="510" width="58" height="95" fill="#a84d2c"/>
+<rect x="225" y="435" width="210" height="175" fill="transparent"/><g transform="translate(330,432)"><use class="spk" href="#spk"/></g><g class="lab" transform="translate(330,412)"><rect class="o" x="-42" y="-16" width="84" height="22" fill="#f2deb0"/><text data-k="about" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2314"></text></g></g>
+<g class="hot" data-p="cv" tabindex="0" role="button">
+<rect class="o" x="404" y="596" width="16" height="14" fill="#e0c88f"/><rect class="o" x="456" y="596" width="16" height="14" fill="#e0c88f"/>
+<rect class="o" x="410" y="586" width="52" height="22" fill="#f2deb0"/>
+<rect x="418" y="592" width="24" height="3" fill="#8a6a3a"/><rect x="418" y="598" width="30" height="3" fill="#8a6a3a"/><rect x="418" y="603" width="20" height="3" fill="#8a6a3a"/>
+<rect x="398" y="575" width="76" height="40" fill="transparent"/><g transform="translate(436,565)"><use class="spk" href="#spk"/></g><g class="lab" transform="translate(436,548)"><rect class="o" x="-42" y="-16" width="84" height="22" fill="#f2deb0"/><text data-k="cv" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2314"></text></g></g>
+<g id="fire" class="hot" tabindex="0" role="button">
+<rect class="o" x="486" y="592" width="30" height="14" fill="#6b3f22" transform="rotate(-16 501 599)"/>
+<rect class="o" x="526" y="592" width="30" height="14" fill="#7a4b2c" transform="rotate(16 541 599)"/>
+<g class="fl"><rect x="502" y="560" width="36" height="42" fill="#ff7a1a"/><rect x="494" y="576" width="12" height="24" fill="#ff7a1a"/><rect x="534" y="576" width="12" height="24" fill="#ff7a1a"/></g>
+<g class="fl fl2"><rect x="508" y="545" width="24" height="46" fill="#ffb02e"/></g>
+<g class="fl"><rect x="514" y="566" width="12" height="30" fill="#fff1a8"/></g>
+<g class="o" fill="#8a8fa6"><rect x="474" y="604" width="26" height="14"/><rect x="496" y="609" width="26" height="14"/><rect x="520" y="609" width="26" height="14"/><rect x="542" y="604" width="26" height="14"/></g>
+<rect x="468" y="505" width="104" height="125" fill="transparent"/><g class="lab" transform="translate(520,492)"><rect class="o" x="-42" y="-16" width="84" height="22" fill="#f2deb0"/><text data-k="fireS" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2314"></text></g></g>
+<g fill="#ffd66b"><rect class="sp" x="512" y="516" width="5" height="5" style="--x:14px"/><rect class="sp" x="524" y="520" width="4" height="4" style="--x:-16px;animation-delay:-.9s"/><rect class="sp" x="518" y="514" width="5" height="5" style="--x:6px;animation-delay:-1.7s"/></g>
+<g class="hot" data-p="coffee" tabindex="0" role="button"><g class="stm" fill="#e8eefc"><rect x="606" y="566" width="4" height="8"/><rect x="613" y="566" width="4" height="8"/><rect x="620" y="566" width="4" height="8"/></g><rect class="o" x="601" y="583" width="28" height="24" fill="#f4ecd8"/><rect x="601" y="597" width="28" height="10" fill="#e4d7b8"/><rect class="o" x="629" y="588" width="12" height="4" fill="none"/><rect class="o" x="637" y="588" width="4" height="12" fill="none"/><rect class="o" x="629" y="596" width="12" height="4" fill="none"/><rect class="o" x="601" y="579" width="28" height="6" fill="#6b3f22"/><rect x="596" y="558" width="48" height="54" fill="transparent"/><g transform="translate(648,566)"><use class="spk" href="#spk"/></g><g class="lab" transform="translate(615,546)"><rect class="o" x="-42" y="-16" width="84" height="22" fill="#f2deb0"/><text data-k="coffee" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2314"></text></g></g>
+<g class="hot" data-p="contact" tabindex="0" role="button">
+<g class="gl"><rect x="762" y="286" width="56" height="12" fill="#ffb347" opacity=".35"/><rect x="750" y="298" width="80" height="20" fill="#ffb347" opacity=".28"/></g>
+<rect x="787" y="262" width="6" height="34" fill="#150d1f"/>
+<rect class="o" x="772" y="296" width="36" height="46" fill="#ffcb5c"/>
+<rect x="768" y="292" width="44" height="8" fill="#150d1f"/><rect x="772" y="338" width="36" height="8" fill="#150d1f"/>
+<rect x="784" y="304" width="12" height="30" fill="#ffe27a"/>
+<rect x="760" y="285" width="60" height="70" fill="transparent"/><g transform="translate(770,292)"><use class="spk" href="#spk"/></g><g class="lab" transform="translate(790,378)"><rect class="o" x="-42" y="-16" width="84" height="22" fill="#f2deb0"/><text data-k="contact" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2314"></text></g></g>
+<g transform="translate(190,658)"><g class="walk"><rect x="-20" y="0" width="40" height="6" fill="#000" opacity=".3"/>
+<rect class="o2 leg" x="-9" y="-16" width="7" height="16" fill="#2b2f4d"/><rect class="o2 leg b" x="2" y="-16" width="7" height="16" fill="#2b2f4d"/>
+<rect class="o2 leg" x="-9" y="-8" width="7" height="8" fill="#150d1f"/><rect class="o2 leg b" x="2" y="-8" width="7" height="8" fill="#150d1f"/>
+<g class="bob"><rect class="o2" x="-16" y="-48" width="32" height="34" fill="#24428f"/>
+<rect x="-16" y="-18" width="32" height="4" fill="#c98a44"/>
+<rect class="o2" x="-22" y="-46" width="6" height="20" fill="#24428f"/><rect class="o2" x="16" y="-46" width="6" height="20" fill="#24428f"/>
+<rect class="o2" x="-21" y="-28" width="5" height="5" fill="#ffe3cf"/><rect class="o2" x="16" y="-28" width="5" height="5" fill="#ffe3cf"/>
+<rect class="o2" x="-14" y="-52" width="28" height="6" fill="#c98a44"/>
+<rect id="gh" class="o2" x="-9" y="-66" width="18" height="16" fill="#ffe3cf"/>
+<rect class="o2" x="-11" y="-76" width="22" height="10" fill="#f4f6fb"/><rect class="o2" x="-13" y="-66" width="4" height="10" fill="#f4f6fb"/><rect class="o2" x="9" y="-66" width="4" height="10" fill="#f4f6fb"/>
+<rect x="-6" y="-63" width="4" height="4" fill="#150d1f"/><rect x="2" y="-63" width="4" height="4" fill="#150d1f"/>
+<rect x="-9" y="-57" width="3" height="3" fill="#ff9aa2" opacity=".6"/><rect x="6" y="-57" width="3" height="3" fill="#ff9aa2" opacity=".6"/>
+</g></g></g>
+<g id="flies"></g>
+</svg>
+
+<header id="hud">
+<div>
+<h1 data-k="name"></h1>
+<p class="role" data-k="role"></p>
+<div class="res"><span><svg class="ic"><use href="#i-bulb"/></svg> <em data-k="ideas" style="font-style:normal"></em> <b id="c1">0</b></span><span><svg class="ic"><use href="#i-cup"/></svg> <em data-k="coffee" style="font-style:normal"></em> <b id="c2">0</b></span><span><svg class="ic"><use href="#i-book"/></svg> <em data-k="read" style="font-style:normal"></em> <b id="c3">0</b></span></div>
+<p class="role" style="font-size:14px" data-k="hint"></p>
+</div>
+<div class="lang" role="group" aria-label="Language"><button data-l="en" aria-pressed="true">EN</button><button data-l="zh" aria-pressed="false">中文</button></div>
+</header>
+
+<section id="panel" hidden role="dialog" aria-labelledby="pt"></section>
+<div id="bub" aria-hidden="true"></div>
+<section id="lib" hidden aria-label="Library"><div class="top"><button class="btn" id="lb"></button><h2 id="lt"></h2></div><main><div id="shelf"></div><div id="reader" hidden></div></main></section>
+
+<nav aria-label="Sections"><button data-p="about"><svg class="ic"><use href="#i-tent"/></svg><small data-k="about"></small></button><button data-p="lib"><svg class="ic"><use href="#i-lib"/></svg><small data-k="lib"></small></button><button data-p="cv"><svg class="ic"><use href="#i-scroll"/></svg><small data-k="cv"></small></button><button data-p="contact"><svg class="ic"><use href="#i-lantern"/></svg><small data-k="contact"></small></button><button data-p="coffee"><svg class="ic"><use href="#i-cup"/></svg><small data-k="coffee"></small></button></nav>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+/* ===== Edit your content here (English + 中文) ===== */
+const T={
+en:{name:"Lê Lam Kiều (Marcus Chen)",role:"I'm just a hermit and a weird thinker.",hint:"Tap the campfire to spark ideas.",ideas:"Ideas",coffee:"Coffee",read:"Papers read",about:"About",lib:"Library",cv:"CV",contact:"Contact",close:"Close",fire:"Campfire: tap to spark ideas",fireS:"Spark ideas",
+aboutP:["Even though my university major is Oriental Studies, my true passion lies in a completely different field. I find myself constantly drawn to political philosophy, the various schools of libertarianism, and Austrian economics, especially the works of Murray Rothbard. I am also deeply inspired by the ideas of Thomas Sowell. While this path is entirely unrelated to my formal degree, I believe that building a solid basic scientific foundation is what truly matters when trying to understand how society works.","My greatest aspiration is to pursue in-depth studies in political philosophy or other branches of political science. Ultimately, I want to use that knowledge to open courses, translate books, and build academic organisations where these ideas can be taught and discussed openly."],
+edu:"Education",eduL:["BA in Oriental Studies, University of Social Sciences and Humanities, VNU-HCM (expected June 2027)","Exchange student, China-South Asia Young Envoys Program, Yunnan University (June 2026)"],
+cv0:[["Papers and presentations",[["Navigating algorithmic waves: AI-driven maritime domain awareness and grey-zone risk management in the South China Sea","Accepted for the 2026 Annual Conference of Southeast Asian Regional Studies in Taiwan (ACSEAST 2026)"],["The centrally planned net: Digital intervention, incentive structures, and the economics of censorship in Vietnam","Proposal submitted to the AAS Annual Conference 2027, Rising Voices Panel (under review)"],["Evolution and development of Vietnamese national identity in the contemporary regional context","SEASGRAD Conference, 2026"],["Bilateral economic relations and strategic partnerships between Bulgaria and Vietnam","Vietnam Up Close, 2025"]]],
+["Research and work",[["Collaborator and Translator, The South China Sea Chronicle Initiative (2025 to present)","Translates and contextualises articles and reports on South China Sea security and Vietnam-ASEAN foreign policy, and contributes to situational reports such as Open Sea Dynamics."],["Academic Contributor, Vietnam Strategic Forum and The Saigon Times (2025 to present)","Writes analyses of public policy and core concepts of political philosophy, and comparative studies of Northeast Asian economic development models."]]],
+["Leadership",[["Local Coordinator, Students For Liberty Vietnam (April 2026 to present)","Advances classical liberal philosophy, free-market economics and academic freedom through campus seminars and workshops. Designed and moderated a debate on digital sovereignty and state censorship."]]],
+["Award",[["15th place, Youth Liberty Prize (2026)","International essay competition on political economy and individual liberty."]]],
+["Skills",[["Qualitative content analysis and textual analysis","Vietnamese (native), English (IELTS 7.0), Mandarin Chinese (HSK 4)"]]]],
+cof1:"Buy me a coffee",cofd:"Every book I translate takes long nights and a lot of caffeine. If my work helps you think, a coffee keeps the translation going.",cof2:"0121000904474\nLE LAM KIEU\nTransfer note: ung ho nguoi ngheo",
+ct:[["Email",'<a href="mailto:lelamkieu7@gmail.com">lelamkieu7@gmail.com</a>'],["LinkedIn",'<a href="https://www.linkedin.com/in/lam-kieu-749437321/details/experience/" target="_blank" rel="noopener">linkedin.com/in/lam-kieu-749437321</a>'],["Facebook",'<a href="https://www.facebook.com/marcus.chen.so.real/" target="_blank" rel="noopener">facebook.com/marcus.chen.so.real</a>']],
+libT:"Library of Translations",back:"Back to camp",wip:"Read on WordPress",soon:"More books will be added here."},
+zh:{name:"Lê Lam Kiều（别名 Marcus Chen）",role:"我只是一个隐士，一个古怪的思考者。",hint:"点击篝火，点燃灵感。",ideas:"灵感",coffee:"咖啡",read:"已读论文",about:"关于我",lib:"图书馆",cv:"履历",contact:"联系",close:"关闭",fire:"篝火：点击激发灵感",fireS:"点燃灵感",
+aboutP:["虽然我在大学主修东方学，但我真正的热情在完全不同的领域。我不断被政治哲学、自由意志主义的各个流派和奥地利学派经济学所吸引，尤其是穆雷·罗斯巴德（Murray Rothbard）的著作。托马斯·索威尔（Thomas Sowell）的思想也深深启发了我。尽管这条道路与我的正式学位毫无关联，但我相信，在试图理解社会如何运作时，真正重要的是打下扎实的基础科学素养。","我最大的心愿是深入研究政治哲学或政治学的其他分支。最终，我希望用这些知识开设课程、翻译书籍，并建立学术组织，让这些思想能够被公开地教授和讨论。"],
+edu:"教育背景",eduL:["东方学文学学士，越南国家大学胡志明市分校社会科学与人文大学（预计2027年6月毕业）","云南大学“中国—南亚青年使者”项目交换生（2026年6月）"],
+cv0:[["论文与报告",[["驾驭算法浪潮：人工智能驱动的海域态势感知与南海灰色地带风险管理","已获接受，将在2026年东南亚区域研究年会（ACSEAST 2026，台湾）上宣读"],["中央计划之网：越南的数字干预、激励结构与审查经济学","论文提案已提交至亚洲研究协会2027年年会“新锐之声”专场（审稿中）"],["当代区域背景下越南民族认同的演变与发展","SEASGRAD 会议，2026年"],["保加利亚与越南的双边经济关系与战略伙伴关系","“Vietnam Up Close”，2025年"]]],
+["研究与工作",[["南海编年倡议（SCSCI）合作者与译者（2025年至今）","翻译并语境化有关南海安全与越南—东盟外交政策的文章和报告，并参与撰写《开阔海域动态》（Chuyển Động Biển Mở）等海上安全形势报告。"],["越南战略论坛与《西贡时报》学术撰稿人（2025年至今）","撰写公共政策与政治哲学核心概念的分析文章，以及东北亚经济发展模式的比较研究。"]]],
+["领导经历",[["学生争取自由组织（Students For Liberty）越南地区协调员（2026年4月至今）","通过校园研讨会和工作坊，推动古典自由主义哲学、自由市场经济学与学术自由。设计并主持了一场关于数字主权与国家审查的辩论。"]]],
+["奖项",[["青年自由奖（Youth Liberty Prize）第15名（2026年）","聚焦政治经济学与个人自由的国际征文比赛。"]]],
+["技能",[["定性内容分析、文本分析","越南语（母语）、英语（雅思7.0）、汉语（HSK 4）"]]]],
+cof1:"请我喝杯咖啡",cofd:"翻译每一本书，都要熬过许多个漫长的夜晚，喝下不少咖啡。如果我的文字曾让你有所思考，一杯咖啡就能让翻译继续下去。",cof2:"0121000904474\nLE LAM KIEU\n转账内容: ung ho nguoi ngheo",
+ct:[["邮箱",'<a href="mailto:lelamkieu7@gmail.com">lelamkieu7@gmail.com</a>'],["LinkedIn",'<a href="https://www.linkedin.com/in/lam-kieu-749437321/details/experience/" target="_blank" rel="noopener">linkedin.com/in/lam-kieu-749437321</a>'],["Facebook",'<a href="https://www.facebook.com/marcus.chen.so.real/" target="_blank" rel="noopener">facebook.com/marcus.chen.so.real</a>']],
+libT:"译作图书馆",back:"返回营地",wip:"在 WordPress 阅读",soon:"更多书籍将陆续加入。"}};
+const P={
+about:t=>`${t.aboutP.map(x=>`<p>${x}</p>`).join('')}<h3>${t.edu}</h3><ul>${t.eduL.map(x=>`<li>${x}</li>`).join('')}</ul>`,
+cv:t=>t.cv0.map(s=>`<h3>${s[0]}</h3><ul class="pubs">${s[1].map(x=>`<li><b>${x[0]}</b><small>${x[1]}</small></li>`).join('')}</ul>`).join(''),
+contact:t=>`<div class="ct">${t.ct.map(x=>`<b>${x[0]}</b><span>${x[1]}</span>`).join('')}</div>`,
+coffee:t=>`<h3>${t.cof1}</h3><p>${t.cofd}</p><pre style="white-space:pre-wrap;font:800 17px/1.7 'Nunito','Noto Sans SC',monospace;margin:0">${t.cof2}</pre>`};
+const BOOKS=[{s:"Leftism",t:"Leftism: From de Sade and Marx to Hitler and Marcuse",tz:"《左派：从萨德、马克思到希特勒与马尔库塞》",a:"Erik von Kuehnelt-Leddihn",y:1974,
+link:"https://marcuschensoreal.wordpress.com/mac-dich-2/"}];
+const Q={en:["Those little brats dare to disturb me?","Hmm... I hope nobody finds these forbidden books.","Tsk, tsk. The moon is dazzling tonight, and here I sit, missing a shadow of someone, somewhere.","Rothbard or Sowell tonight? Why not both.","One more chapter before the fire dies down.","Freedom is a quiet thing. It likes firelight and a long reading list."],
+zh:["这群毛头小子，也敢来打扰我？","嗯……希望这堆禁书不会被人发现。","啧啧，今夜月色皎洁，我独坐于此，思念着某个遥远的身影。","今晚读罗斯巴德，还是读索威尔？不如都读。","趁着篝火未熄，再译一章。","自由是安静的东西，它喜欢火光，也喜欢一份很长的书单。"]};
+
+let lang='en',cur=null;const n=[0,0,0];
+function render(){const p=$('#panel');$$('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.p===cur));
+ if(!cur){p.hidden=true;return}
+ const t=T[lang];p.hidden=false;
+ p.innerHTML=`<div class="ph"><h2 id="pt">${t[cur]}</h2><button id="x" aria-label="${t.close}">✕</button></div>${P[cur](t)}`;
+ $('#x').onclick=()=>{cur=null;render()}}
+function openP(k){cur=k;render();$('#x').focus()}
+function setLang(l){lang=l;const t=T[l];document.documentElement.lang=l==='zh'?'zh-CN':'en';
+ document.title=t.name+' | '+t.role;
+ $$('[data-k]').forEach(e=>e.textContent=t[e.dataset.k]);
+ $$('[data-l]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===l));
+ $$('.hot').forEach(g=>g.setAttribute('aria-label',t[g.dataset.p||'fire']));
+ render();renderLib();try{localStorage.setItem('lang',l)}catch(e){}}
+$$('[data-l]').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+$$('nav button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='lib')openLib();else if(cur===b.dataset.p){cur=null;render()}else openP(b.dataset.p)});
+$$('.hot').forEach(g=>{g.onclick=()=>{if(g.dataset.p)openP(g.dataset.p)};
+ g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();g.click()}}});
+document.onkeydown=e=>{if(e.key!=='Escape')return;if(!$('#lib').hidden){$('#lib').hidden=true}else if(cur){cur=null;render()}};
+
+/* idle counters */
+function show(){n.forEach((v,i)=>$('#c'+(i+1)).textContent=v)}
+let tk=0;setInterval(()=>{tk++;n[0]++;if(tk%5==0)n[1]++;if(tk%12==0)n[2]++;show()},1000);
+$('#fire').addEventListener('click',()=>{n[0]+=10;show();
+ const r=$('#fire').getBoundingClientRect(),d=document.createElement('div');
+ d.className='pop';d.textContent='+10 ✦';d.style.left=r.left+r.width/2-24+'px';d.style.top=r.top+'px';
+ document.body.append(d);setTimeout(()=>d.remove(),1000)});
+
+/* scene generation - pixel style: squares on a grid instead of circles/curves */
+const PX=4;
+function grid(v){return Math.round(v/PX)*PX}
+let s='';for(let i=0;i<130;i++){const sz=Math.random()<.7?PX:PX*2;s+=`<rect class="tw" x="${grid(Math.random()*1000)}" y="${grid(Math.random()*370)}" width="${sz}" height="${sz}" fill="#fff8dc" style="animation-duration:${(1+Math.random()*2).toFixed(1)}s;animation-delay:-${(Math.random()*5).toFixed(1)}s"/>`}
+$('#stars').innerHTML=s;
+function pines(id,c,y,h0,h1,f){let o='';for(let i=0;i<c;i++){const x=grid((i+.5)*1000/c+(Math.random()-.5)*30),h=h0+Math.random()*(h1-h0),w=grid(h*.22),steps=5;
+ for(let k=0;k<steps;k++){const rowH=h/steps,t=grid(y-h+k*rowH),rowW=grid(2+(w-2)*(k+1)/steps);o+=`<rect x="${x-rowW}" y="${t}" width="${rowW*2}" height="${Math.ceil(rowH/PX)*PX+1}" fill="${f}"/>`}
+ o+=`<rect x="${x-PX}" y="${grid(y-h*.14)}" width="${PX*2}" height="${grid(h*.14)+PX*2}" fill="${f}"/>`}
+ $('#'+id).innerHTML=o}
+pines('far',14,500,130,190,'#1f2f70');pines('mid',10,565,220,300,'#153a4f');
+let f='';for(let i=0;i<16;i++){f+=`<rect class="ff" x="${grid(200+Math.random()*620)}" y="${grid(380+Math.random()*230)}" width="5" height="5" fill="#d8ff8a" style="--dx:${(Math.random()*80-40)|0}px;--dy:${(-Math.random()*70)|0}px;animation-duration:${(5+Math.random()*5).toFixed(1)}s;animation-delay:-${(Math.random()*8).toFixed(1)}s"/>`}
+$('#flies').innerHTML=f;
+
+try{lang=localStorage.getItem('lang')==='zh'?'zh':'en'}catch(e){}
+setLang(lang);
+
+function renderLib(){const L=$('#lib');if(L.hidden)return;const t=T[lang];
+ $('#lb').textContent='← '+t.back;$('#lt').textContent=t.libT;
+ $('#shelf').hidden=false;$('#reader').hidden=true;
+ $('#shelf').innerHTML=BOOKS.map(b=>`<a class="bk" href="${b.link}" target="_blank" rel="noopener"><div class="spine">${b.s}</div><div><h3>${b.t}</h3><p>${lang=='zh'?b.tz+'<br>':''}${b.a} (${b.y})</p><p><b>${t.wip} →</b></p></div></a>`).join('')+`<p class="soon">${t.soon}</p>`}
+function openLib(){cur=null;render();$('#lib').hidden=false;renderLib();$('#lb').focus()}
+$('#lb').onclick=()=>{$('#lib').hidden=true};
+
+let qi=-1;
+function say(){const b=$('#bub'),q=Q[lang];b.classList.remove('on');setTimeout(()=>{qi=(qi+1+(Math.random()*(q.length-1)|0))%q.length;b.textContent=q[qi];b.classList.add('on')},350)}
+$$('[data-l]').forEach(b=>b.addEventListener('click',say));
+$('#gh').addEventListener('click',say);
+setTimeout(say,1200);setInterval(say,8000);
+(function track(){const b=$('#bub'),h=$('#gh').getBoundingClientRect(),w=b.offsetWidth,x=h.left+h.width/2,l=Math.max(8,Math.min(innerWidth-w-8,x-w/2));
+ b.style.transform=`translate(${l}px,${Math.max(8,h.top-b.offsetHeight-20)}px)`;b.style.setProperty('--tx',(x-l)+'px');requestAnimationFrame(track)})();
+</script>
+</body>
+</html>
